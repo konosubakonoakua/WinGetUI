@@ -1,0 +1,27 @@
+name: Retrieve latest translations from Tolgee
+
+on:
+  schedule:
+    - cron: 0 0 * * *
+  workflow_dispatch:
+jobs:
+  main:
+    runs-on: windows-latest
+    env:
+        TOLGEE_KEY: "${{ secrets.TOLGEE_TOKEN }}"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Download Tolgee translations
+        run: |
+          python scripts/download_translations.py --autocommit
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          delete-branch: true
+          base: main
+          title: "Update translations from Tolgee"
+          reviewers: "${{ github.repository_owner }}"
+          author: "Tolgee Bot <tolgee-bot@users.noreply.github.com>"
+          commit-message: "Update translations from Tolgee"
+          branch: pull-request/update-translation
